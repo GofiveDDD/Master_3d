@@ -41,11 +41,6 @@ This repository implements a **single-view 3D reconstruction framework for birds
 │  └─ evaluate.py
 
 └─ README.md
-```
-
-> If some scripts are not in your repo yet, use these names when you add them to keep the README actionable.
-
----
 
 ### Installation
 **Requirements**
@@ -58,83 +53,17 @@ This repository implements a **single-view 3D reconstruction framework for birds
 ### Data Preparation
 1) **Download CUB-200-2011** separately (place under `data/CUB-200-2011`).  
 2) **Preprocess** (bbox-guided SAM mask → crop/resize to 256×256; remap keypoints 15→14; normalize to [0,1]).
-```bash
-python scripts/prepare_cub.py \
-  --root data/CUB-200-2011 \
-  --out  data/processed \
-  --resize 256 \
-  --kp-remap cub15_to_14.json \
-  --use-sam
 ```
-This script writes:
 ```
-data/processed/
-  images/*.png
-  masks/*.png
-  keypoints/*.json    # normalized [0,1] coords (+ visibility)
-  splits/{train.txt,val.txt}
-```
-
----
-
-### Configs
-`configs/detector.yaml`
-```yaml
-seed: 42
-data:
-  root: data/processed
-  img_size: 256
-  num_keypoints: 14
-model:
-  backbone: resnet50
-  head: fpn_se          # options: heatmap, fpn_se
-  heatmap_out: 64
-train:
-  batch_size: 32
-  epochs: 160
-  lr: 1.0e-3
-  aug: {flip: true, affine: true, color_jitter: true}
-loss:
-  type: masked_l2       # for coordinate regression
-```
-
-`configs/regressor.yaml`
-```yaml
-seed: 42
-data:
-  root: data/processed
-  img_size: 256
-  num_keypoints: 14
-  kp_subset: 12         # 12 points used downstream
-model:
-  pose_mlp: [36, 512, 512, 153]  # 25*6 + 3 camera
-  shape_cnn: {in_size: 64, out_dim: 24} # bone-length scalars (root fixed to 1.0)
-  rotation: sixd
-  bird_model:
-    joints: 25
-    use_lbs: true
-train:
-  batch_size: 64
-  epochs: 140
-  lr: 1.0e-3
-loss:
-  reprojection: smooth_l1
-  bone_prior:
-    weight: 0.1
-    mean_file: null     # or path-to-prior.npz
-```
-
----
 
 ### Training
 **Keypoint Detector**
 ```bash
-python train/train_detector.py --config configs/detector.yaml
+python train/train_detector.py 
 ```
 **Regressor**
 ```bash
-python train/train_regressor.py --config configs/regressor.yaml \
-  --detector-ckpt checkpoints/detector_best.pth
+python train/train_regressor.py 
 ```
 
 ---
@@ -143,22 +72,7 @@ python train/train_regressor.py --config configs/regressor.yaml \
 ```bash
 python eval/evaluate.py --checkpoint checkpoints/regressor_best.pth
 ```
-**Metrics reported in the paper**
-| Model                 | Supervision | MPJPE ↓ | PCK@0.05 ↑ | PCK@0.10 ↑ |
-|----------------------|-------------|---------|------------|------------|
-| Detector (baseline)  | Heatmap     | 41.524  | 0.133      | 0.362      |
-| Detector (FPN+SE)    | CoordReg    | 39.816  | 0.207      | 0.487      |
 
-> The substantial PCK gains indicate more predictions moved within tighter thresholds, while a few large residuals keep MPJPE modestly improved—consistent with stronger global-shape cues from FPN+SE.
-
----
-
-### Reproducibility
-- Fixed random seeds (config).  
-- Input resolution fixed to **256×256**; synchronized keypoint normalization.  
-- Visibility-masked losses; evaluation excludes occluded points by mask.  
-
----
 
 ### Limitations & Future Work
 - Sensitivity to domain shift (illumination/species/extreme viewpoints).  
@@ -167,20 +81,6 @@ python eval/evaluate.py --checkpoint checkpoints/regressor_best.pth
 **Future**: probabilistic regression (uncertainty), stronger structural priors (skeleton/graph constraints), domain generalization & TTA.
 
 ---
-
-### Citation
-If you use this repository, please cite:
-```bibtex
-@article{yourpaper2025,
-  title   = {Single-View 3D Bird Reconstruction via Deep Learning},
-  author  = {Your Name},
-  journal = {TBD},
-  year    = {2025}
-}
-```
-
-### License
-MIT (unless you prefer another). CUB-200-2011 and SAM follow their respective licenses.
 
 ### Acknowledgements
 - CUB-200-2011: dataset with 200 bird species, bbox, 15 keypoints.  
