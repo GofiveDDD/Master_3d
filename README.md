@@ -39,8 +39,9 @@ This repository implements a **single-view 3D reconstruction framework for birds
 │  └─ train_regressor.py
 ├─ eval/
 │  └─ evaluate.py
-
 └─ README.md
+
+```
 
 ### Installation
 **Requirements**
@@ -87,16 +88,4 @@ python eval/evaluate.py --checkpoint checkpoints/regressor_best.pth
 - Segment Anything (SAM): used for segmentation masks.  
 - Community implementations of 6D rotation → SO(3) and LBS/FK routines.
 
-### 训练 & 测试
-```bash
-# 训练关键点检测器
-python train/train_detector.py --config configs/detector.yaml
-
-# 训练参数回归器
-python train/train_regressor.py --config configs/regressor.yaml \
-  --detector-ckpt checkpoints/detector_best.pth
-
-# 评估
-python eval/evaluate.py --checkpoint checkpoints/regressor_best.pth
-```
 
