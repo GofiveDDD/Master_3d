@@ -9,7 +9,6 @@ This repository implements a **single-view 3D reconstruction framework for birds
 - **Parametric Bird Model**: skeleton + mesh + skinning weights + forward kinematics; projects to 2D via least-squares weak projection.
 - **Training/Eval**: MPJPE, PCK@α; ablation on heatmap vs coordinate regression.
 
-> This README mirrors the content of your paper and provides runnable entry points and configs.
 
 ---
 
@@ -21,27 +20,6 @@ This repository implements a **single-view 3D reconstruction framework for birds
 
 ---
 
-### Directory Layout
-```
-├─ data/
-│  ├─ CUB-200-2011/          # raw dataset (downloaded separately)
-│  └─ processed/             # preprocessed images/masks/keypoints (auto-generated)
-│  
-├─ models/
-│  ├─ detector/              # ResNet-50 baseline & FPN+SE heads
-│  ├─ regressor/             # MLP/CNN branches, 6D rotation → SO(3)
-│  └─ bird_model/            # skeleton, skin weights, FK/LBS, projection
-├─ scripts/
-│  ├─ prepare_cub.py         # preprocess:  SAM masks, resize
-│  └─ visualize.py           # draw kps/meshes; qualitative comparisons
-├─ train/
-│  ├─ train_detector.py
-│  └─ train_regressor.py
-├─ eval/
-│  └─ evaluate.py
-└─ README.md
-
-```
 
 ### Installation
 **Requirements**
@@ -60,11 +38,11 @@ This repository implements a **single-view 3D reconstruction framework for birds
 ### Training
 **Keypoint Detector**
 ```bash
-python train/train_detector.py 
+keypoint_detector_train.ipynb
 ```
 **Regressor**
 ```bash
-python train/train_regressor.py 
+regressor_train.ipynb
 ```
 
 ---
